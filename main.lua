@@ -28,7 +28,7 @@ local function cmd_path()
             os.getenv("USERPROFILE") .. "\\scoop\\apps\\libreoffice\\current\\program\\soffice.exe",
         }
 
-        for _ENV, c in ipairs(cmd) do
+        for _, c in ipairs(cmd) do
             if cmd_exists(prefix .. c) then
                 return c
             end
