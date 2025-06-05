@@ -11,17 +11,28 @@ end
 local function cmd_path()
     local cmd = "libreoffice"
     local os_family = ya.target_family()
-    local os = ya.target_os()
+    local os_name = ya.target_os()
     local prefix = (os_family == "windows" and "where" or "command -v") .. " "
 
     if cmd_exists(prefix .. cmd) then return cmd end
 
-    if os == "macos" then
+    if os_name == "macos" then
         local cmd = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
         if cmd_exists(prefix .. cmd) then return cmd end
-    elseif os == "linux" then
+    elseif os_name == "linux" then
         local cmd = "/usr/bin/libreoffice"
         if cmd_exists(prefix .. cmd) then return cmd end
+    elseif os_name == "windows" then
+        local cmd = {
+            "C:\\Program Files\\LibreOffice\\program\\soffice.exe",
+            os.getenv("USERPROFILE") .. "\\scoop\\apps\\libreoffice\\current\\program\\soffice.exe",
+        }
+
+        for _ENV, c in ipairs(cmd) do
+            if cmd_exists(prefix .. c) then
+                return c
+            end
+        end
     end
 
     return ""
@@ -36,6 +47,10 @@ local function file_basename(path)
 end
 
 function M:peek(job)
+    if cmd_path() == "" then
+        return
+    end
+
     local start, cache = os.clock(), ya.file_cache(job)
     if not cache then
         return
@@ -71,14 +86,14 @@ function M:preload(job)
 
     -- stylua: ignore
     local output, err = Command(cmd)
-        :args({
+        :arg {
             "--headless",
             "--convert-to",
             "jpg",
             tostring(job.file.url),
             '--outdir',
             outdir
-        })
+        }
         :stdout(Command.PIPED)
         :stderr(Command.PIPED)
         :output()
