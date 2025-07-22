@@ -1,5 +1,6 @@
 # libreoffice.yazi
-Libreoffice for previewing document, spreedsheet and presentation
+
+Support office files preview via libreoffice
 
 # Requirement
 
